@@ -1,4 +1,4 @@
-name: Build LaTeX PDFs
+name: Build LaTeX PDF
 
 on:
   push:
@@ -14,24 +14,27 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install LaTeX
-        run: sudo apt-get update && sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra latexmk
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-fonts-extra \
+            latexmk
 
-      - name: Compile LaTeX files
+      - name: Compile LaTeX (conference_101719.tex)
         run: |
           mkdir -p build
-          for file in *.tex; do
-            [ -e "$file" ] || continue
-            latexmk -pdf -output-directory=build "$file"
-          done
+          latexmk -pdf -output-directory=build conference_101719.tex
 
-      - name: Move PDFs to repo root
+      - name: Move PDF to repo root
         run: |
-          for pdf in build/*.pdf; do
-            cp "$pdf" .
-          done
+          cp build/conference_101719.pdf ./conference_101719.pdf
 
-      - name: Commit PDFs
+      - name: Commit PDF to repo
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-build LaTeX PDFs"
-          file_pattern: "*.pdf"
+          commit_message: "Auto-build PDF from conference_101719.tex"
+          file_pattern: "conference_101719.pdf"
