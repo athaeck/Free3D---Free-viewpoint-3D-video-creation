@@ -1,0 +1,37 @@
+name: Build LaTeX PDFs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install LaTeX
+        run: sudo apt-get update && sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra latexmk
+
+      - name: Compile LaTeX files
+        run: |
+          mkdir -p build
+          for file in *.tex; do
+            [ -e "$file" ] || continue
+            latexmk -pdf -output-directory=build "$file"
+          done
+
+      - name: Move PDFs to repo root
+        run: |
+          for pdf in build/*.pdf; do
+            cp "$pdf" .
+          done
+
+      - name: Commit PDFs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-build LaTeX PDFs"
+          file_pattern: "*.pdf"
